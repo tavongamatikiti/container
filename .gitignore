@@ -1,0 +1,34 @@
+# Build
+bin/
+build/
+cmake-build-*/
+out/
+*.o
+*.a
+*.so
+*.dylib
+*.out
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+compile_commands.json
+
+# CLion
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+*~
+
+# Editor backups
+*.swp
+*.swo
+.cache/
