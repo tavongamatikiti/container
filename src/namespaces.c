@@ -48,11 +48,11 @@ static int child_fn(void *arg) {
 
   char command_path[PATH_MAX];
   if (val->argv[0][0] == '/') {
-    command_path = val->argv[0];
+    snprintf(command_path, sizeof(command_path), "%s", val->argv[0]);
   } else if (strchr(val->argv[0], '/') != NULL) {
-    command_path = "/<argv[0]>";
+    snprintf(command_path, sizeof(command_path), "/%s", val->argv[0]);
   } else {
-    command_path = "/bin/<argv[0]>";
+    snprintf(command_path, sizeof(command_path), "/bin/%s", val->argv[0]);
   }
 
   execv(command_path, (char *const *)val->argv);
