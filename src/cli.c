@@ -40,7 +40,8 @@ void usage(int status) {
       _("\
 Usage: %s run [OPTIONS] <rootfs> <command> [args...]\n\
   or:  %s run --rootfs PATH [OPTIONS] <command> [args...]\n\
-"),
+"
+        "\n"),
       PROGRAM_NAME,
       PROGRAM_NAME
     );
@@ -48,8 +49,7 @@ Usage: %s run [OPTIONS] <rootfs> <command> [args...]\n\
       _("\
 Create and run a new container.\n\
 \n\
-"
-        "\n"),
+"),
       stdout
     );
     oputs(_("\
@@ -178,7 +178,7 @@ int cli_run(int argc, char **argv) {
     return EXIT_SUCCESS;
   }
 
-  if (strcmp(argv[0], "run") == 0) {
+  if (strcmp(argv[1], "run") == 0) {
     struct run_opts opts;
     if (cli_parse_run(argc - 1, argv + 1, &opts) == -1) {
       usage(EXIT_FAILURE);
@@ -187,7 +187,7 @@ int cli_run(int argc, char **argv) {
 
     if (
       argc >= 2 &&
-      (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "help") == 0 || strcmp(argv[1], "-h") == 0)
+      (strcmp(argv[2], "--help") == 0 || strcmp(argv[2], "help") == 0 || strcmp(argv[2], "-h") == 0)
     ) {
       usage(EXIT_SUCCESS);
       return EXIT_SUCCESS;
