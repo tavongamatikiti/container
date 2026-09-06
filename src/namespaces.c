@@ -1,17 +1,22 @@
 #define _GNU_SOURCE
 #include "container/namespaces.h"
-#include "container/mount.h"
-#include "log.h"
 #include <errno.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+
 #ifdef __linux__
+#include "container/mount.h"
+#include "log.h"
+#include <arpa/inet.h>
+#include <net/if.h>
 #include <sched.h>
 #include <signal.h>
+#include <sys/ioctl.h>
 #include <sys/mount.h>
+#include <sys/socket.h>
 #else
 #include <signal.h>
 #endif
@@ -38,6 +43,33 @@ static int child_fn(void *arg) {
     (void)len;
 #endif
   }
+
+  int fds = socket(AF_INET, SOCK_DGRAM, 0);
+  if (fds == -1) {
+    LOG_ERROR("Failed to create network socket: %s", strerror(errno));
+    return -1;
+  }
+
+  struct ifreq ifr = {0};
+  strncpy(ifr.ifr_name, "lo", IFNAMSIZ - 1);
+
+  if (ioctl(fds, SIOCGIFFLAGS, &ifr)) {
+    LOG_ERROR("Failed to get flags for interface '%s': %s", ifr.ifr_name, strerror(errno));
+    close(fds);
+    return -1;
+  }
+
+  ifr.ifr_flags |= IFF_UP;
+
+  if (ioctl(fds, SIOCSIFFLAGS, &ifr) == -1) {
+    LOG_ERROR("Failed to bring interface '%s' up: %s", ifr.ifr_name, strerror(errno));
+    close(fds);
+    return -1;
+  }
+
+  close(fds);
+
+  LOG_DEBUG("Loopback interface '%s' is up", ifr.ifr_name);
 
   if (val->rootfs != NULL) {
     if (set_mount(val->rootfs, "oldroot") == -1) {
@@ -66,7 +98,8 @@ int container_spawn(pid_t *pid, char *const argv[], const char *hostname, const 
 
   struct child_arg arg = {argv, hostname, rootfs};
 
-  int flags = CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWUTS | CLONE_NEWIPC | CLONE_NEWCGROUP | SIGCHLD;
+  int flags = CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWUTS | CLONE_NEWIPC | CLONE_NEWCGROUP |
+    CLONE_NEWNET | SIGCHLD;
 
   *pid = clone(child_fn, child_stack + STACK_SIZE, flags, &arg);
 
