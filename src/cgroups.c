@@ -96,7 +96,7 @@ int cgroup_add_proc(const char *cgroup, pid_t pid) {
   }
 
   int path_len =
-      snprintf(procs_path, sizeof(procs_path), "%s/%s/%s", CGROUP_ROOT, cgroup, CGROUP_PROCS);
+    snprintf(procs_path, sizeof(procs_path), "%s/%s/%s", CGROUP_ROOT, cgroup, CGROUP_PROCS);
   if (path_len < 0 || path_len >= (int)sizeof(procs_path)) {
     LOG_ERROR("Cgroup procs path too long: %s/%s/%s", CGROUP_ROOT, cgroup, CGROUP_PROCS);
     errno = ENAMETOOLONG;
@@ -164,8 +164,8 @@ int cgroup_enable_controllers(void) {
   char controllers_path[PATH_MAX];
   const char *controllers = "+cpu +memory +pids";
 
-  int path_len = snprintf(controllers_path, sizeof(controllers_path), "%s/%s", CGROUP_ROOT,
-                          CGROUP_CONTROLLERS);
+  int path_len =
+    snprintf(controllers_path, sizeof(controllers_path), "%s/%s", CGROUP_ROOT, CGROUP_CONTROLLERS);
   if (path_len < 0 || path_len >= (int)sizeof(controllers_path)) {
     LOG_ERROR("Cgroup controllers path too long: %s/%s", CGROUP_ROOT, CGROUP_CONTROLLERS);
     errno = ENAMETOOLONG;

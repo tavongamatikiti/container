@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #ifdef __linux__
+#include "container/config.h"
 #include <sys/mount.h>
 #include <sys/syscall.h>
 #endif
@@ -67,7 +68,9 @@ int set_mount(const char *rootfs, const char *oldroot_name) {
 
   LOG_INFO("Pivoting root to %s with oldroot %s", rootfs, oldroot_path);
   if (pivot_root_syscall(rootfs, oldroot_path) == -1) {
-    LOG_ERROR("Failed to pivot root to %s with oldroot %s: %s", rootfs, oldroot_path, strerror(errno));
+    LOG_ERROR(
+      "Failed to pivot root to %s with oldroot %s: %s", rootfs, oldroot_path, strerror(errno)
+    );
     return -1;
   }
 
@@ -109,6 +112,30 @@ int set_mount(const char *rootfs, const char *oldroot_name) {
     return -1;
   }
   LOG_INFO("Mounted /proc for container");
+
+  if (mkdir("/sys", 0555) == -1 && errno != EEXIST) {
+    LOG_ERROR("Failed to create /sys folder: %s", strerror(errno));
+    return -1;
+  }
+
+  if (mkdir("/sys/fs", 0555) == -1 && errno != EEXIST) {
+    LOG_ERROR("Failed to create /sys/fs folder: %s", CGROUP_ROOT, strerror(errno));
+    return -1;
+  }
+
+  if (mkdir(CGROUP_ROOT, 0755) == -1 && errno != EEXIST) {
+    LOG_ERROR("Failed to create %s cgroup: %s", CGROUP_ROOT, strerror(errno));
+    return -1;
+  }
+
+  LOG_DEBUG("Mounting cgroup2 at /sys/fs/cgroup");
+
+  if (mount("cgroup2", CGROUP_ROOT, "cgroup2", 0, NULL) == -1) {
+    LOG_ERROR("Failed to mount %s: %s", CGROUP_ROOT, strerror(errno));
+    return -1;
+  }
+
+  LOG_INFO("Mounted cgroup namespace at /sys/fs/cgroup");
 
   return 0;
 #else

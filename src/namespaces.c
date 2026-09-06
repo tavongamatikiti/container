@@ -66,7 +66,7 @@ int container_spawn(pid_t *pid, char *const argv[], const char *hostname, const 
 
   struct child_arg arg = {argv, hostname, rootfs};
 
-  int flags = CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWUTS | CLONE_NEWIPC | SIGCHLD;
+  int flags = CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWUTS | CLONE_NEWIPC | CLONE_NEWCGROUP | SIGCHLD;
 
   *pid = clone(child_fn, child_stack + STACK_SIZE, flags, &arg);
 
