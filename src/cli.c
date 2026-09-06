@@ -114,7 +114,7 @@ int cli_parse_run(int argc, char **argv, struct run_opts *opts) {
   optind = 1;
   opterr = 0;
 
-  while ((opt = getopt_long(argc, argv, "", run_opts_long, &idx)) != -1) {
+  while ((opt = getopt_long(argc, argv, "n:h:r:m:p:c:w:", run_opts_long, &idx)) != -1) {
     switch (opt) {
       case 'n':
         opts->name = optarg;
